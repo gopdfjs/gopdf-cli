@@ -1,0 +1,17 @@
+node_modules/
+.pnpm-debug.log*
+.turbo/
+dist/
+build/
+target/
+Cargo.lock
+coverage/
+*.lcov
+.vitest/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+.DS_Store
+*.log
+*.tmp
