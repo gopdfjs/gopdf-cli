@@ -27,12 +27,8 @@
     "@gopdfjs/engine": "0.1.0",
     "@gopdf-cli/setup": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.0.1",
-    "@napi-rs/canvas": "0.1.97",
     "ink": "^5.2.1",
-    "pdf-lib": "^1.17.1",
-    "pdfjs-dist": "^5.4.296",
-    "react": "^18.3.1",
-    "tesseract.js": "^7.0.0"
+    "react": "^18.3.1"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

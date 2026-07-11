@@ -3,8 +3,6 @@ node_modules/
 .turbo/
 dist/
 build/
-target/
-Cargo.lock
 coverage/
 *.lcov
 .vitest/
@@ -17,3 +15,5 @@ coverage/
 *.tmp
 
 .codegraph/
+logs/security/
+fixtures/

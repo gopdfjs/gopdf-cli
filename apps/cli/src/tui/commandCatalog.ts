@@ -15,7 +15,7 @@ export const COMMAND_GROUPS: CommandGroup[] = [
   {
     title: "Transform",
     commands: [
-      { name: "compress", summary: "Shrink PDF (WASM)" },
+      { name: "compress", summary: "Shrink PDF" },
       { name: "grayscale", summary: "Convert to grayscale" },
       { name: "linearize", summary: "Fast Web View" },
     ],
@@ -27,7 +27,7 @@ export const COMMAND_GROUPS: CommandGroup[] = [
       { name: "pdf-to-jpeg", summary: "Pages → JPEG" },
       { name: "pdf-to-text", summary: "Selectable text" },
       { name: "ocr", summary: "OCR via tesseract" },
-      { name: "compare-tokens", summary: "Token cost estimate" },
+      { name: "compare-text", summary: "Text diff between two PDFs" },
     ],
   },
   {

@@ -1,9 +1,8 @@
 import path from "node:path";
-import type { CompressionLevel } from "@gopdfjs/engine";
 import {
   COMPRESSION_LEVELS,
   isCompressionLevel,
-  type CompressionLevel as CliCompressionLevel,
+  type CompressionLevel,
 } from "../constants.ts";
 import { parseInputOutputArgv } from "../lib/argv.ts";
 import { defaultSiblingOutput, readBytes, writeBytes } from "../lib/io.ts";
@@ -11,7 +10,7 @@ import { runEngineCommandExit } from "../lib/runEngineCommand.ts";
 import { renderByteSummary } from "../tui/renderSummary.tsx";
 import { withProgress } from "../tui/withProgress.tsx";
 
-const DEFAULT_LEVEL: CliCompressionLevel = "recommended";
+const DEFAULT_LEVEL: CompressionLevel = "recommended";
 
 export const COMPRESS_USAGE = `Usage: gopdf compress <input.pdf> [-o out.pdf] [--level low|recommended|extreme]
 

@@ -8,51 +8,34 @@ import {
   ListToolsRequestSchema,
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
-import { compressPdf, grayscalePdf, linearizePdf } from "@gopdfjs/engine";
-import { analyzePdf } from "../analyze.ts";
-import { pdfToImages } from "@gopdfjs/extract";
-import { ocrPdf } from "@gopdfjs/extract";
-import {
-  formatComparisonReport,
-  measurePdfTokenComparison,
-} from "./compareTokens.ts";
-import { extractPdfTextFromFile, PDF_TO_TEXT_FORMAT } from "./pdfToText.ts";
+import { getEngine } from "../lib/getEngine.ts";
+import { readBytes, writeBytes, writeText } from "../lib/io.ts";
+import { formatAnalyzeReportText } from "../lib/analyzeReport.ts";
+import { formatTextDiffReport } from "./compareText.ts";
+import { readPdfTextFromFile, PDF_TO_TEXT_FORMAT } from "./pdfToText.ts";
 
-/**
- * Runs MCP Server over Stdio.
- * Auxiliary output should use stderr, so stdout is completely reserved for JSON-RPC messages.
- */
+/** MCP stdio server — all tools call `engine.*()` via getEngine() (RFC 0001). */
 export async function runMcpServer(): Promise<number> {
-  // Use stderr for debug messages to avoid polluting stdout
   console.error("Starting gopdf-mcp-server...");
 
   const server = new Server(
-    {
-      name: "gopdf-mcp-server",
-      version: "0.1.0",
-    },
-    {
-      capabilities: {
-        tools: {},
-      },
-    }
+    { name: "gopdf-mcp-server", version: "0.1.0" },
+    { capabilities: { tools: {} } },
   );
 
-  // Register tools list
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools: [
       {
         name: "compress_pdf",
-        description: "Compresses a local PDF file, reducing its file size.",
+        description: "Compress a local PDF file.",
         inputSchema: {
           type: "object",
           properties: {
-            inputPath: { type: "string", description: "Absolute path to the input PDF file" },
-            outputPath: { type: "string", description: "Absolute path where compressed PDF will be saved" },
+            inputPath: { type: "string" },
+            outputPath: { type: "string" },
             level: {
               type: "string",
               enum: ["low", "recommended", "extreme"],
-              description: "Compression strength. Default: recommended",
             },
           },
           required: ["inputPath", "outputPath"],
@@ -60,359 +43,236 @@ export async function runMcpServer(): Promise<number> {
       },
       {
         name: "grayscale_pdf",
-        description: "Converts all pages of a PDF to grayscale.",
+        description: "Convert a PDF to grayscale.",
         inputSchema: {
           type: "object",
           properties: {
-            inputPath: { type: "string", description: "Absolute path to the input PDF file" },
-            outputPath: { type: "string", description: "Absolute path where grayscale PDF will be saved" },
+            inputPath: { type: "string" },
+            outputPath: { type: "string" },
           },
           required: ["inputPath", "outputPath"],
         },
       },
       {
         name: "linearize_pdf",
-        description: "Linearizes a PDF for Fast Web View optimization.",
+        description: "Linearize a PDF for Fast Web View.",
         inputSchema: {
           type: "object",
           properties: {
-            inputPath: { type: "string", description: "Absolute path to the input PDF file" },
-            outputPath: { type: "string", description: "Absolute path where linearized PDF will be saved" },
+            inputPath: { type: "string" },
+            outputPath: { type: "string" },
           },
           required: ["inputPath", "outputPath"],
         },
       },
       {
         name: "analyze_pdf",
-        description: "Performs diagnostic analysis of the PDF's internal elements (font, image, and page counts).",
+        description: "Diagnostic report for a PDF.",
         inputSchema: {
           type: "object",
-          properties: {
-            inputPath: { type: "string", description: "Absolute path to the PDF file to analyze" },
-          },
+          properties: { inputPath: { type: "string" } },
           required: ["inputPath"],
         },
       },
       {
-        name: "pdf_to_jpg",
-        description: "Converts PDF pages into JPEG files using Node-native canvas.",
+        name: "pdf_to_jpeg",
+        description: "Render PDF pages to JPEG files.",
         inputSchema: {
           type: "object",
           properties: {
-            inputPath: { type: "string", description: "Absolute path to the input PDF file" },
-            outputPath: {
-              type: "string",
-              description: "Absolute output base prefix or path (files will be appended with -page-<num>.jpg)",
-            },
-            quality: {
-              type: "number",
-              minimum: 0.1,
-              maximum: 1.0,
-              description: "JPEG compression quality from 0.1 to 1.0 (default: 0.92)",
-            },
-            scale: {
-              type: "number",
-              minimum: 0.5,
-              maximum: 5.0,
-              description: "Render scaling factor (default: 2)",
-            },
+            inputPath: { type: "string" },
+            outputPath: { type: "string" },
+            quality: { type: "number" },
+            scale: { type: "number" },
           },
           required: ["inputPath", "outputPath"],
         },
       },
       {
         name: "ocr_pdf",
-        description: "Extracts text from a local PDF by running OCR with tesseract.js.",
+        description: "OCR a PDF to text.",
         inputSchema: {
           type: "object",
           properties: {
-            inputPath: { type: "string", description: "Absolute path to the input PDF file" },
-            outputPath: { type: "string", description: "Absolute path where the extracted text file will be saved" },
-            lang: { type: "string", description: "OCR language library, e.g., 'eng' (default: eng)" },
+            inputPath: { type: "string" },
+            outputPath: { type: "string" },
+            lang: { type: "string" },
           },
           required: ["inputPath", "outputPath"],
         },
       },
       {
         name: "pdf_to_text",
-        description:
-          "Extracts selectable text from a local PDF using pdf.js (not OCR). Supports optional page range and txt/md output.",
+        description: "Extract selectable text from a PDF.",
         inputSchema: {
           type: "object",
           properties: {
-            path: { type: "string", description: "Absolute path to the input PDF file" },
-            startPage: {
-              type: "number",
-              minimum: 1,
-              description: "First page to include (default: 1 when endPage is set)",
-            },
-            endPage: {
-              type: "number",
-              minimum: 1,
-              description: "Last page to include (default: last page when startPage is set)",
-            },
-            format: {
-              type: "string",
-              enum: ["txt", "md"],
-              description: "Output format (default: txt)",
-            },
+            path: { type: "string" },
+            startPage: { type: "number" },
+            endPage: { type: "number" },
+            format: { type: "string", enum: ["txt", "html", "rtf"] },
           },
           required: ["path"],
         },
       },
       {
-        name: "compare_pdf_tokens",
-        description:
-          "Compares estimated AI input tokens for multimodal, full-text, and smart MCP PDF reading strategies.",
+        name: "compare_pdf_text",
+        description: "Text-level diff between two PDF files.",
         inputSchema: {
           type: "object",
           properties: {
-            path: { type: "string", description: "Absolute path to the input PDF file" },
-            targetPages: {
-              type: "number",
-              minimum: 1,
-              description: "Pages fetched in the smart MCP path (default: 2)",
-            },
-            startPage: {
-              type: "number",
-              minimum: 1,
-              description: "First page for measured sliced-text tokens (default: 1)",
-            },
-            endPage: {
-              type: "number",
-              minimum: 1,
-              description: "Last page for measured sliced-text tokens (default: start + targetPages - 1)",
-            },
+            pathA: { type: "string" },
+            pathB: { type: "string" },
           },
-          required: ["path"],
+          required: ["pathA", "pathB"],
         },
       },
     ],
   }));
 
-  // Handle tool executions
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
+    const engine = await getEngine();
 
     try {
       switch (name) {
         case "compress_pdf": {
-          const { inputPath, outputPath, level = "recommended" } = args as any;
-          if (!fs.existsSync(inputPath)) {
-            throw new McpError(ErrorCode.InvalidParams, `Input file not found: ${inputPath}`);
-          }
-          const bytes = new Uint8Array(fs.readFileSync(inputPath));
-          const compressed = await compressPdf(bytes, level);
-          fs.mkdirSync(path.dirname(path.resolve(outputPath)), { recursive: true });
-          fs.writeFileSync(outputPath, compressed);
+          const { inputPath, outputPath, level = "recommended" } = args as {
+            inputPath: string;
+            outputPath: string;
+            level?: "low" | "recommended" | "extreme";
+          };
+          const bytes = readBytes(inputPath);
+          const compressed = await engine.compressPdf(bytes, level);
+          writeBytes(outputPath, compressed);
           return {
             content: [
               {
                 type: "text",
-                text: `Successfully compressed PDF.\nInput: ${bytes.byteLength.toLocaleString()} bytes\nOutput: ${compressed.byteLength.toLocaleString()} bytes\nSaved: ${outputPath}`,
+                text: `Compressed ${inputPath} → ${outputPath} (${compressed.byteLength} bytes)`,
               },
             ],
           };
         }
 
         case "grayscale_pdf": {
-          const { inputPath, outputPath } = args as any;
-          if (!fs.existsSync(inputPath)) {
-            throw new McpError(ErrorCode.InvalidParams, `Input file not found: ${inputPath}`);
-          }
-          const bytes = new Uint8Array(fs.readFileSync(inputPath));
-          const result = await grayscalePdf(bytes);
-          fs.mkdirSync(path.dirname(path.resolve(outputPath)), { recursive: true });
-          fs.writeFileSync(outputPath, result);
+          const { inputPath, outputPath } = args as {
+            inputPath: string;
+            outputPath: string;
+          };
+          const result = await engine.grayscalePdf(readBytes(inputPath), {
+            mode: "grayscale",
+          });
+          writeBytes(outputPath, result.bytes);
           return {
-            content: [
-              {
-                type: "text",
-                text: `Successfully grayscaled PDF and saved to: ${outputPath}`,
-              },
-            ],
+            content: [{ type: "text", text: `Grayscaled → ${outputPath}` }],
           };
         }
 
         case "linearize_pdf": {
-          const { inputPath, outputPath } = args as any;
-          if (!fs.existsSync(inputPath)) {
-            throw new McpError(ErrorCode.InvalidParams, `Input file not found: ${inputPath}`);
-          }
-          const bytes = new Uint8Array(fs.readFileSync(inputPath));
-          const result = await linearizePdf(bytes);
-          fs.mkdirSync(path.dirname(path.resolve(outputPath)), { recursive: true });
-          fs.writeFileSync(outputPath, result);
+          const { inputPath, outputPath } = args as {
+            inputPath: string;
+            outputPath: string;
+          };
+          const out = await engine.linearizePdf(readBytes(inputPath));
+          writeBytes(outputPath, out);
           return {
-            content: [
-              {
-                type: "text",
-                text: `Successfully linearized PDF and saved to: ${outputPath}`,
-              },
-            ],
+            content: [{ type: "text", text: `Linearized → ${outputPath}` }],
           };
         }
 
         case "analyze_pdf": {
-          const { inputPath } = args as any;
-          const report = await analyzePdf(inputPath);
-          const sizeMb = (report.sizeBytes / 1024 / 1024).toFixed(2);
-          const reportText = [
-            `=== PDF Diagnostic Report ===`,
-            `File: ${report.fileName}`,
-            `Size: ${sizeMb} MB (${report.sizeBytes.toLocaleString()} bytes)`,
-            `Pages: ${report.pageCount}`,
-            `Fonts: ${report.fontCount}`,
-            `Form XObjects: ${report.formCount}`,
-            `Image XObjects: ${report.imageCount}`,
-            `=============================`,
-          ].join("\n");
+          const { inputPath } = args as { inputPath: string };
+          const bytes = readBytes(inputPath);
+          const report = await engine.analyzePdf(bytes, {
+            fileName: path.basename(inputPath),
+            fileSizeBytes: bytes.byteLength,
+          });
           return {
-            content: [{ type: "text", text: reportText }],
+            content: [{ type: "text", text: formatAnalyzeReportText(report) }],
           };
         }
 
-        case "pdf_to_jpg": {
-          const { inputPath, outputPath, quality = 0.92, scale = 2 } = args as any;
-          if (!fs.existsSync(inputPath)) {
-            throw new McpError(ErrorCode.InvalidParams, `Input file not found: ${inputPath}`);
-          }
-          const bytes = new Uint8Array(fs.readFileSync(inputPath));
-          const results = await pdfToImages(bytes, quality, scale);
-
-          fs.mkdirSync(path.dirname(path.resolve(outputPath)), { recursive: true });
-          const createdFiles: string[] = [];
-
-          for (const { bytes: imgBytes, page } of results) {
-            let pagePath: string;
+        case "pdf_to_jpeg": {
+          const {
+            inputPath,
+            outputPath,
+            quality = 0.92,
+            scale = 2,
+          } = args as {
+            inputPath: string;
+            outputPath: string;
+            quality?: number;
+            scale?: number;
+          };
+          const pages = await engine.pdfToJpeg(readBytes(inputPath), {
+            quality,
+            scale,
+          });
+          const created: string[] = [];
+          for (const { bytes, page } of pages) {
             const lower = outputPath.toLowerCase();
-            if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
-              const ext = path.extname(outputPath);
-              const base = outputPath.slice(0, -ext.length);
-              pagePath = `${base}-page-${page}${ext}`;
-            } else {
-              pagePath = `${outputPath}-page-${page}.jpg`;
-            }
-            fs.writeFileSync(pagePath, imgBytes);
-            createdFiles.push(pagePath);
+            const pagePath =
+              lower.endsWith(".jpg") || lower.endsWith(".jpeg")
+                ? `${outputPath.slice(0, -path.extname(outputPath).length)}-page-${page}${path.extname(outputPath)}`
+                : `${outputPath}-page-${page}.jpg`;
+            writeBytes(pagePath, bytes);
+            created.push(pagePath);
           }
-
           return {
             content: [
               {
                 type: "text",
-                text: `Successfully rendered ${results.length} page(s) to JPG.\nFiles created:\n${createdFiles.join("\n")}`,
+                text: `Rendered ${pages.length} page(s):\n${created.join("\n")}`,
               },
             ],
           };
         }
 
         case "ocr_pdf": {
-          const { inputPath, outputPath, lang = "eng" } = args as any;
-          if (!fs.existsSync(inputPath)) {
-            throw new McpError(ErrorCode.InvalidParams, `Input file not found: ${inputPath}`);
-          }
-          const bytes = new Uint8Array(fs.readFileSync(inputPath));
-          const text = await ocrPdf(bytes, lang);
-
-          fs.mkdirSync(path.dirname(path.resolve(outputPath)), { recursive: true });
-          fs.writeFileSync(outputPath, text, "utf8");
-
+          const {
+            inputPath,
+            outputPath,
+            lang = "eng",
+          } = args as { inputPath: string; outputPath: string; lang?: string };
+          const text = await engine.ocr(readBytes(inputPath), lang);
+          writeText(outputPath, text);
           return {
-            content: [
-              {
-                type: "text",
-                text: `Successfully executed OCR and wrote full text to: ${outputPath}`,
-              },
-            ],
+            content: [{ type: "text", text: `OCR → ${outputPath}` }],
           };
         }
 
         case "pdf_to_text": {
-          const {
-            path: inputPath,
-            startPage,
-            endPage,
-            format = PDF_TO_TEXT_FORMAT.TXT,
-          } = args as {
+          const { path: inputPath, format = PDF_TO_TEXT_FORMAT.TXT } = args as {
             path: string;
-            startPage?: number;
-            endPage?: number;
-            format?: "txt" | "md";
+            format?: "txt" | "html" | "rtf";
           };
-
-          if (!inputPath || !fs.existsSync(inputPath)) {
-            throw new McpError(ErrorCode.InvalidParams, `Input file not found: ${inputPath}`);
+          if (!fs.existsSync(inputPath)) {
+            throw new McpError(ErrorCode.InvalidParams, `Not found: ${inputPath}`);
           }
-
-          if (format !== PDF_TO_TEXT_FORMAT.TXT && format !== PDF_TO_TEXT_FORMAT.MD) {
-            throw new McpError(ErrorCode.InvalidParams, 'format must be "txt" or "md"');
-          }
-
-          const resolvedStart = startPage ?? (endPage !== undefined ? 1 : undefined);
-          const resolvedEnd = endPage ?? startPage;
-          if (
-            resolvedStart !== undefined &&
-            resolvedEnd !== undefined &&
-            resolvedEnd < resolvedStart
-          ) {
-            throw new McpError(
-              ErrorCode.InvalidParams,
-              "endPage must be greater than or equal to startPage",
-            );
-          }
-
-          const text = await extractPdfTextFromFile(inputPath, {
-            startPage: resolvedStart,
-            endPage: resolvedEnd,
-            format,
-          });
-
-          return {
-            content: [{ type: "text", text }],
-          };
+          const text = await readPdfTextFromFile(inputPath, format);
+          return { content: [{ type: "text", text }] };
         }
 
-        case "compare_pdf_tokens": {
-          const {
-            path: inputPath,
-            targetPages = 2,
-            startPage = 1,
-            endPage,
-          } = args as {
-            path: string;
-            targetPages?: number;
-            startPage?: number;
-            endPage?: number;
-          };
-
-          if (!inputPath || !fs.existsSync(inputPath)) {
-            throw new McpError(ErrorCode.InvalidParams, `Input file not found: ${inputPath}`);
+        case "compare_pdf_text": {
+          const { pathA, pathB } = args as { pathA: string; pathB: string };
+          for (const p of [pathA, pathB]) {
+            if (!fs.existsSync(p)) {
+              throw new McpError(ErrorCode.InvalidParams, `Not found: ${p}`);
+            }
           }
-
-          const resolvedEnd = endPage ?? startPage + targetPages - 1;
-          if (resolvedEnd < startPage) {
-            throw new McpError(
-              ErrorCode.InvalidParams,
-              "endPage must be greater than or equal to startPage",
-            );
-          }
-
-          const payload = await measurePdfTokenComparison(inputPath, {
-            targetPages,
-            startPage,
-            endPage: resolvedEnd,
-            includeOneImage: true,
-          });
-
+          const result = await engine.comparePdfText(
+            readBytes(pathA),
+            readBytes(pathB),
+          );
           return {
             content: [
               {
                 type: "text",
-                text: formatComparisonReport(
-                  payload.fileName,
-                  payload,
-                  payload.sliceRange,
+                text: formatTextDiffReport(
+                  path.basename(pathA),
+                  path.basename(pathB),
+                  result,
                 ),
               },
             ],
@@ -422,15 +282,11 @@ export async function runMcpServer(): Promise<number> {
         default:
           throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
       }
-    } catch (error: any) {
-      console.error(`Error in tool execution ${name}:`, error);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`MCP tool ${name} failed:`, error);
       return {
-        content: [
-          {
-            type: "text",
-            text: `Error executing tool ${name}: ${error?.message || error}`,
-          },
-        ],
+        content: [{ type: "text", text: `Error: ${message}` }],
         isError: true,
       };
     }
@@ -438,8 +294,6 @@ export async function runMcpServer(): Promise<number> {
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("gopdf-mcp-server connected to Stdio transport.");
-
-  // Keep process running (mcp-sdk connection handles stdio events)
+  console.error("gopdf-mcp-server connected.");
   return new Promise(() => {});
 }

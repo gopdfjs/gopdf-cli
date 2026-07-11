@@ -6,10 +6,9 @@ Local PDF CLI (`gopdf`). Reads/writes files on disk only — no upload.
 
 ```bash
 pnpm install
-pnpm build:wasm
-pnpm build:cli
+pnpm build
 pnpm test
-node apps/cli/dist/index.mjs compress packages/fixtures/pdf/py-pdf-libre-writer.pdf
+node apps/cli/dist/index.mjs compress fixtures/pdf/py-pdf-libre-writer.pdf
 ```
 
 Bin: **`gopdf`** (alias **`gopdf-cli`**).

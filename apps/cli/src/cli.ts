@@ -41,9 +41,9 @@ export async function runCli(argv: string[]): Promise<number> {
       const { runOcr } = await import("./commands/ocr.ts");
       return runOcr(rest);
     }
-    case "compare-tokens": {
-      const { runCompareTokens } = await import("./commands/compareTokens.ts");
-      return runCompareTokens(rest);
+    case "compare-text": {
+      const { runCompareText } = await import("./commands/compareText.ts");
+      return runCompareText(rest);
     }
     case "mcp": {
       const { runMcpServer } = await import("./commands/mcp.ts");

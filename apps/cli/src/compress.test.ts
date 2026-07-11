@@ -2,14 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
-import { PDF_FIXTURES } from "@gopdfjs/fixtures";
+import { PDF_FIXTURES } from "./lib/fixtures.ts";
 import { parseCompressArgv, runCompress } from "./commands/compress.ts";
-
-const WASM_PATH = path.join(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "../../engine/pkg/gopdf_wasm_bg.wasm",
-);
-const wasmBuilt = fs.existsSync(WASM_PATH);
 
 describe("gopdf compress", () => {
   const tmpDir = path.join(
@@ -33,11 +27,11 @@ describe("gopdf compress", () => {
     expect(opts?.output).toBe("/tmp/out.pdf");
   });
 
-  it.skipIf(!wasmBuilt)("compresses shared fixture", async () => {
+  it("compresses fixture via engine", async () => {
     fs.mkdirSync(tmpDir, { recursive: true });
     const out = path.join(tmpDir, "out.pdf");
     const code = await runCompress([
-      PDF_FIXTURES.FLATE_SAMPLE,
+      PDF_FIXTURES.PY_PDF_LIBRE_WRITER,
       "-o",
       out,
       "--level",

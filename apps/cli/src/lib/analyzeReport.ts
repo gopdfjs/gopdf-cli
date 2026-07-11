@@ -1,20 +1,33 @@
-import type { PdfAnalysisResult } from "@gopdfjs/engine";
+import type { GopdfEngine } from "./getEngine.ts";
+
+export type PdfAnalysisResult = Awaited<ReturnType<GopdfEngine["analyzePdf"]>>;
 
 export function printAnalyzeReport(report: PdfAnalysisResult): void {
-  console.log(`\n=== PDF Diagnostic Report ===`);
-  console.log(`File: ${report.fileName}`);
-  console.log(`Size: ${report.fileSizeStr}`);
-  console.log(`\n--- Basic Info ---`);
-  console.log(`Pages: ${report.pages}`);
-  console.log(`Version: ${report.version}`);
-  console.log(`Linearized: ${report.isLinearized ? "yes" : "no"}`);
-  console.log(`Encrypted: ${report.isEncrypted ? "yes" : "no"}`);
-  console.log(`Title: ${report.title || "(none)"}`);
-  console.log(`Author: ${report.author || "(none)"}`);
-  console.log(`\n--- Internal Objects ---`);
-  console.log(`Fonts: ${report.fontCount}`);
-  console.log(`Form XObjects: ${report.formCount}`);
-  console.log(`Image XObjects: ${report.imageCount}`);
-  console.log(`Image raw size: ${report.imageRawSizeMb} MB`);
-  console.log(`\n=============================\n`);
+  console.log(formatAnalyzeReportText(report));
+}
+
+export function formatAnalyzeReportText(report: PdfAnalysisResult): string {
+  return [
+    "",
+    "=== PDF Diagnostic Report ===",
+    `File: ${report.fileName}`,
+    `Size: ${report.fileSizeStr}`,
+    "",
+    "--- Basic Info ---",
+    `Pages: ${report.pages}`,
+    `Version: ${report.version}`,
+    `Linearized: ${report.isLinearized ? "yes" : "no"}`,
+    `Encrypted: ${report.isEncrypted ? "yes" : "no"}`,
+    `Title: ${report.title || "(none)"}`,
+    `Author: ${report.author || "(none)"}`,
+    "",
+    "--- Internal Objects ---",
+    `Fonts: ${report.fontCount}`,
+    `Form XObjects: ${report.formCount}`,
+    `Image XObjects: ${report.imageCount}`,
+    `Image raw size: ${report.imageRawSizeMb} MB`,
+    "",
+    "=============================",
+    "",
+  ].join("\n");
 }

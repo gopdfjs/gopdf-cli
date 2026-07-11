@@ -1,15 +1,17 @@
-import { createNodeGopdf } from "@gopdfjs/adapter-node";
 import type { Gopdf } from "@gopdfjs/engine";
+import { createEngine } from "@gopdfjs/engine";
+import { createNodeAdapter } from "@gopdfjs/adapter-node";
 
-/** Lazy singleton — one WASM/pdf.js init per CLI process (RFC 0001 §4). */
-let enginePromise: Promise<Gopdf> | undefined;
+/** Lazy singleton — adapter boot ONLY here; commands call `engine.*()`. */
+export type GopdfEngine = Gopdf;
 
-export function getEngine(): Promise<Gopdf> {
-  enginePromise ??= createNodeGopdf();
+let enginePromise: Promise<GopdfEngine> | undefined;
+
+export function getEngine(): Promise<GopdfEngine> {
+  enginePromise ??= createNodeAdapter().then((adapter) => createEngine(adapter));
   return enginePromise;
 }
 
-/** Test hook — reset cached engine between cases. */
 export function resetEngineForTests(): void {
   enginePromise = undefined;
 }

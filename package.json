@@ -5,10 +5,7 @@
   "packageManager": "pnpm@10.27.0",
   "scripts": {
     "build": "turbo build",
-    "build:wasm": "bash scripts/build-wasm.sh",
-    "build:cli": "pnpm --filter=@gopdfjs/pdf-cli build",
-    "test": "pnpm test:rust && turbo run test",
-    "test:rust": "cargo test --workspace",
+    "test": "turbo run test",
     "dev": "pnpm --filter=@gopdfjs/pdf-cli dev",
     "fixtures:download": "bash scripts/download-fixtures.sh"
   },
