@@ -6,10 +6,15 @@
   "scripts": {
     "build": "turbo build",
     "test": "turbo run test",
-    "dev": "pnpm --filter=@gopdfjs/pdf-cli dev",
+    "dev": "pangu",
+    "dev:cli": "pnpm --filter=@gopdfjs/pdf-cli dev",
+    "release": "qingniao",
     "fixtures:download": "bash scripts/download-fixtures.sh"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.0",
+    "@systembug/pangu": "^0.1.0",
+    "@systembug/qingniao": "^0.1.0",
     "turbo": "latest"
   }
 }

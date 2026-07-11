@@ -6,8 +6,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { cpSync, existsSync, readFileSync, readdirSync, writeFileSync } from 'fs';
 
-const SITE_DEV_PORT = 5175;
-const SITE_PREVIEW_PORT = 5176;
+const SITE_DEV_PORT = 5179;
+const SITE_PREVIEW_PORT = 5180;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

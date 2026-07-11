@@ -6,7 +6,6 @@
 |------|------|
 | `.spec/rfc/` | **CLI RFCs live here** — not in gopdfjs monorepo |
 | `apps/cli` | `gopdf` bin — subcommands, **`gopdf mcp`**, **`gopdf install`** |
-| `apps/site` | Docs site — install, commands, **MCP for AI agents** |
 | `packages/setup` | **`@gopdf-cli/setup`** — MCP config for Cursor/Claude/Windsurf |
 
 ## Layer stack

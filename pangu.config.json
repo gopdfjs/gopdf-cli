@@ -1,0 +1,18 @@
+{
+  "projectName": "gopdf-cli",
+  "packageManager": "pnpm",
+  "demos": [
+    {
+      "name": "CLI",
+      "value": "cli",
+      "description": "gopdf CLI — vite build --watch",
+      "package": "@gopdfjs/pdf-cli"
+    },
+    {
+      "name": "Site",
+      "value": "site",
+      "description": "Docs site — vite dev server",
+      "package": "@gopdf-cli/site"
+    }
+  ]
+}

@@ -84,11 +84,8 @@ Commands and MCP tools **must** go through `getEngine()` → `engine.*()`. No se
 | pdf-lib, pdfjs-dist, tesseract.js, `@napi-rs/canvas` as CLI deps | Come transitively via adapter |
 | Calling adapter port methods from commands | Adapter is input to `createEngine`, not CLI API |
 | Vendored `packages/engine` for new features | npm facade only |
-| Duplicated PDF / token / text logic in `apps/cli` | Belongs in `engine.*()` (plugins inside engine) |
 
-**Allowed CLI-local only (no PDF semantics):** argv parsing, Ink TUI, filesystem I/O, MCP transport/wiring, formatting engine results for stdout.
-
-**Not allowed:** `@gopdfjs/extract` (including vendored copies like `tokenEstimate.ts`), reimplementing plugin behavior, or any path that bypasses `engine.*()` for PDF work.
+**Allowed CLI-local logic (not Gopdf API):** argv parsing, Ink TUI, I/O helpers, MCP wiring, token-cost heuristics for `compare-tokens` (`apps/cli/src/lib/tokenEstimate.ts`).
 
 ## 6. Command map (`Gopdf` → `gopdf <cmd>`)
 
@@ -103,7 +100,8 @@ Subcommand names = kebab-case of method name (drop `Pdf` suffix where redundant)
 | `pdfToText` | `pdf-to-text` | ✓ | **done** — `engine.pdfToText` |
 | `ocr` | `ocr` | ✓ | **done** — `engine.ocr` |
 | `analyzePdf` | `analyze` | ✓ | **done** — `engine.analyzePdf` |
-| `comparePdfText` | `compare-text` | ✓ | **done** — `engine.comparePdfText` |
+| — | `compare-tokens` | ✓ | **interim** — `engine.analyzePdf` + `engine.pdfToText` + local `tokenEstimate.ts`; rename → `compare-text` when aligned with `comparePdfText` |
+| `mergePdfs` | `merge` | ✓ | pending |
 | `splitPdf` | `split` | ✓ | pending |
 | `rotatePdf` | `rotate` | ✓ | pending |
 | `organizePdf` | `organize` | ✓ | pending |
@@ -129,7 +127,7 @@ Subcommand names = kebab-case of method name (drop `Pdf` suffix where redundant)
 | `extractImages` | `extract-images` | ✓ | pending |
 | `extractPdfTextRuns` | `extract-text-runs` | ✓ | pending |
 | `applyEdits` | `apply-edits` | ✓ | pending |
-| `mergePdfs` | `merge` | ✓ | pending |
+| `comparePdfText` | `compare-text` | ✓ | pending (replaces `compare-tokens`) |
 | `htmlToPdf` | — | ✗ | browser/DOM — CLI prints clear error |
 | `markdownToHtml` | — | ✗ | browser/DOM |
 | `createCompareSession` | — | ✗ | DOM session — not terminal |
@@ -154,7 +152,7 @@ Shared helper: `runEngineCommand(name, fn)` — wraps `getEngine()` then `fn(eng
 
 `gopdf mcp` tools **must** call the same `engine.*()` paths as CLI subcommands via `getEngine()`.
 
-**Implemented today:** `compress_pdf`, `grayscale_pdf`, `linearize_pdf`, `analyze_pdf`, `pdf_to_jpeg`, `ocr_pdf`, `pdf_to_text`, `compare_pdf_text`.
+**Implemented today:** `compress_pdf`, `grayscale_pdf`, `linearize_pdf`, `analyze_pdf`, `pdf_to_jpeg`, `ocr_pdf`, `pdf_to_text`, `compare_pdf_tokens`.
 
 **Target:** mirror every §6 Node ✓ row as an MCP tool when the CLI subcommand lands.
 
@@ -170,14 +168,13 @@ Shared helper: `runEngineCommand(name, fn)` — wraps `getEngine()` then `fn(eng
 | Direct adapter usage in commands | `getEngine()` only |
 | Vendored `packages/engine` for CLI | **deprecate** — npm `@gopdfjs/engine` from registry |
 
-**Remaining:** add §6 pending subcommands · full MCP parity · remove stale `packages/*` duplicates.
+**Remaining:** add §6 pending subcommands · rename `compare-tokens` → `compare-text` · remove stale `packages/*` duplicates when safe · full MCP parity.
 
 ## 10. Success criteria
 
 - [x] Existing transform/extract cmds use `getEngine()` → `engine.*()`
 - [x] `getEngine()` uses `createEngine(await createNodeAdapter())`
 - [x] Zero commands import `@gopdfjs/extract` or `@gopdfjs/plugin-*`
-- [x] `compare-text` uses `engine.comparePdfText` only (no `tokenEstimate.ts`)
 - [x] `pnpm --filter=@gopdfjs/pdf-cli test` passes (fixture-backed integration tests)
 - [ ] All §6 Node ✓ rows have `gopdf <cmd>` implemented
 - [ ] `gopdf mcp` exposes same tool set as full command surface
