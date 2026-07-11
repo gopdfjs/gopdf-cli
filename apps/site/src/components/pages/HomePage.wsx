@@ -3,6 +3,7 @@
 import { LightComponent, autoRegister } from '@wsxjs/wsx-core';
 import { i18n } from '@wsxjs/wsx-i18next';
 import '@wsxjs/wsx-base-components';
+import { sitePath } from '../../sitePaths';
 import styles from './HomePage.css?inline';
 import '../../components/common/Icon.wsx';
 
@@ -39,10 +40,10 @@ export class HomePage extends LightComponent {
             <h1 class="hero-title">{this.t('title')}</h1>
             <p class="hero-subtitle">{this.t('subtitle')}</p>
             <div class="hero-actions">
-              <wsx-link to="/docs/guide/getting-started" class="btn btn-primary btn-large">
+              <wsx-link to={sitePath('/docs/guide/getting-started')} class="btn btn-primary btn-large">
                 {this.t('quickStartCTA', { ns: 'common' })}
               </wsx-link>
-              <wsx-link to="/docs/guide/mcp" class="btn btn-secondary">
+              <wsx-link to={sitePath('/docs/guide/mcp')} class="btn btn-secondary">
                 {this.t('mcpCTA', { ns: 'common' })}
               </wsx-link>
             </div>
@@ -81,14 +82,14 @@ export class HomePage extends LightComponent {
                 <h3 class="feature-title">{this.t('features.terminal.title')}</h3>
                 <p class="feature-description">{this.t('features.terminal.description')}</p>
               </div>
-              <wsx-link to="/commands" class="feature-card feature-card-link">
+              <wsx-link to={sitePath('/commands')} class="feature-card feature-card-link">
                 <div class="feature-icon">
                   <wsx-icon name="package" />
                 </div>
                 <h3 class="feature-title">{this.t('features.commands.title')}</h3>
                 <p class="feature-description">{this.t('features.commands.description')}</p>
               </wsx-link>
-              <wsx-link to="/docs/guide/mcp" class="feature-card feature-card-link">
+              <wsx-link to={sitePath('/docs/guide/mcp')} class="feature-card feature-card-link">
                 <div class="feature-icon">
                   <wsx-icon name="sparkles" />
                 </div>
@@ -129,7 +130,7 @@ export class HomePage extends LightComponent {
               </pre>
             </div>
             <div class="quick-start-actions">
-              <wsx-link to="/docs/guide/installation" class="btn btn-primary">
+              <wsx-link to={sitePath('/docs/guide/installation')} class="btn btn-primary">
                 {this.t('viewDocs', { ns: 'common' })}
               </wsx-link>
             </div>

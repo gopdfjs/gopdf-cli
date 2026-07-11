@@ -3,6 +3,7 @@
 import { LightComponent, autoRegister } from '@wsxjs/wsx-core';
 import { i18n } from '@wsxjs/wsx-i18next';
 import '@wsxjs/wsx-base-components';
+import { sitePath } from '../../sitePaths';
 import styles from './CommandsPage.css?inline';
 import '../../components/common/Icon.wsx';
 
@@ -63,7 +64,7 @@ export class CommandsPage extends LightComponent {
         <section class="commands-cta">
           <div class="commands-container">
             <p class="commands-note">{this.t('note')}</p>
-            <wsx-link to="/docs/guide/mcp" class="btn btn-primary">
+            <wsx-link to={sitePath('/docs/guide/mcp')} class="btn btn-primary">
               {this.t('cta')}
             </wsx-link>
           </div>
