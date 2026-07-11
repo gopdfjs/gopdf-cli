@@ -1,0 +1,41 @@
+{
+  "title": "gopdf CLI",
+  "subtitle": "终端本地 PDF 工具 — 压缩、分析、OCR 等。通过 MCP 接入 Cursor、Claude、Windsurf。",
+  "stats": {
+    "cli": "终端优先",
+    "mcp": "AI 代理",
+    "local": "文件不离开本机"
+  },
+  "features": {
+    "title": "为什么选择 gopdf",
+    "local": {
+      "title": "默认私有",
+      "description": "PDF 仅在本机读写，无需上传。"
+    },
+    "terminal": {
+      "title": "单一二进制",
+      "description": "npm 全局安装。脚本、CI、交互终端同一套命令。"
+    },
+    "commands": {
+      "title": "完整命令集",
+      "description": "转换、提取、诊断 — 每个子命令附示例。"
+    },
+    "mcp": {
+      "title": "AI 用 MCP",
+      "description": "gopdf install 配置 stdio MCP，让代理在本地处理 PDF。"
+    }
+  },
+  "quickStart": {
+    "title": "快速开始",
+    "description": "脚本、npm 或 Homebrew 安装，然后压缩 PDF 并配置 MCP。"
+  },
+  "install": {
+    "title": "安装",
+    "script": "curl -fsSL https://gopdfjs.github.io/gopdf-cli/install.js | node",
+    "npm": "npm install -g @gopdfjs/pdf-cli",
+    "brew": "brew install --HEAD systembugtj/luban-homebrew/gopdf",
+    "scriptLabel": "脚本",
+    "npmLabel": "npm",
+    "brewLabel": "Homebrew"
+  }
+}

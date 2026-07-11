@@ -10,14 +10,11 @@
 macOS / Linux users install via Homebrew:
 
 ```bash
+# Until @gopdfjs/pdf-cli is on npm
+brew install --HEAD systembugtj/luban-homebrew/gopdf
+
+# After npm publish (formula switches to npm tarball)
 brew install systembugtj/luban-homebrew/gopdf
-```
-
-Optional tap-first flow:
-
-```bash
-brew tap systembugtj/luban-homebrew
-brew install gopdf
 ```
 
 ## 2. Tap
@@ -26,6 +23,7 @@ brew install gopdf
 |------|-------|
 | GitHub repo | `systembugtj/luban-homebrew` |
 | Tap id | `systembugtj/luban-homebrew` |
+| GitHub repo | [`luban-homebrew`](https://github.com/systembugtj/luban-homebrew) (local: `/Volumes/ORICO/ws/prj/systembug/luban-homebrew`) |
 | Formula file | `Formula/gopdf.rb` |
 | Binary names | `gopdf`, `gopdf-cli` |
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Re-fetch PDF fixtures into packages/fixtures/pdf
+# Re-fetch PDF fixtures into fixtures/pdf
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$ROOT/fixtures/pdf"

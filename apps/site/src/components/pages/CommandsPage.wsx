@@ -1,0 +1,72 @@
+/** @jsxImportSource @wsxjs/wsx-core */
+
+import { LightComponent, autoRegister } from '@wsxjs/wsx-core';
+import { i18n } from '@wsxjs/wsx-i18next';
+import '@wsxjs/wsx-base-components';
+import styles from './CommandsPage.css?inline';
+import '../../components/common/Icon.wsx';
+
+const COMMAND_GROUPS = [
+  { key: 'transform', icon: 'package' },
+  { key: 'extract', icon: 'search' },
+  { key: 'meta', icon: 'sparkles' },
+] as const;
+
+@autoRegister({ tagName: 'commands-page' })
+@i18n('commands')
+export class CommandsPage extends LightComponent {
+  constructor() {
+    super({
+      styles,
+      styleName: 'commands-page',
+    });
+  }
+
+  render() {
+    return (
+      <div class="commands-page">
+        <section class="commands-hero">
+          <div class="commands-container">
+            <h1 class="commands-title">{this.t('title')}</h1>
+            <p class="commands-subtitle">{this.t('subtitle')}</p>
+          </div>
+        </section>
+
+        <section class="commands-grid-section">
+          <div class="commands-container">
+            {COMMAND_GROUPS.map(({ key, icon }) => (
+              <div class="command-group" key={key}>
+                <div class="command-group-header">
+                  <wsx-icon name={icon} />
+                  <h2 class="command-group-title">{this.t(`groups.${key}.title`)}</h2>
+                </div>
+                <div class="commands-grid">
+                  {(this.t(`groups.${key}.items`, { returnObjects: true }) as Array<{
+                    name: string;
+                    summary: string;
+                    example: string;
+                  }>).map((item) => (
+                    <article class="command-card" key={item.name}>
+                      <h3 class="command-name">gopdf {item.name}</h3>
+                      <p class="command-description">{item.summary}</p>
+                      <code class="command-example">{item.example}</code>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section class="commands-cta">
+          <div class="commands-container">
+            <p class="commands-note">{this.t('note')}</p>
+            <wsx-link to="/docs/guide/mcp" class="btn btn-primary">
+              {this.t('cta')}
+            </wsx-link>
+          </div>
+        </section>
+      </div>
+    );
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "brandName": "gopdf CLI",
+  "description": "Local PDF terminal tools and MCP server for AI agents — powered by @gopdfjs/engine.",
+  "resources": {
+    "title": "Resources",
+    "docs": "Documentation",
+    "mcp": "MCP for AI",
+    "commands": "Command reference",
+    "github": "gopdf-cli",
+    "engineRepo": "GoPDF.js engine"
+  },
+  "copyright": "© 2026 gopdf-cli contributors. Licensed under MIT."
+}

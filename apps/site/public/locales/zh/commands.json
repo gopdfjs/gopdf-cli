@@ -1,0 +1,73 @@
+{
+  "title": "命令",
+  "subtitle": "所有 gopdf 子命令仅处理本地文件。MCP 工具与 CLI 能力一一对应，供 AI 代理调用。",
+  "groups": {
+    "transform": {
+      "title": "转换",
+      "items": [
+        {
+          "name": "compress",
+          "summary": "缩小 PDF 体积",
+          "example": "gopdf compress doc.pdf -o out.pdf"
+        },
+        {
+          "name": "grayscale",
+          "summary": "转为灰度",
+          "example": "gopdf grayscale doc.pdf -o gray.pdf"
+        },
+        {
+          "name": "linearize",
+          "summary": "Fast Web View 线性化",
+          "example": "gopdf linearize doc.pdf -o web.pdf"
+        }
+      ]
+    },
+    "extract": {
+      "title": "提取与检查",
+      "items": [
+        {
+          "name": "analyze",
+          "summary": "诊断报告",
+          "example": "gopdf analyze doc.pdf"
+        },
+        {
+          "name": "pdf-to-jpeg",
+          "summary": "页面转 JPEG",
+          "example": "gopdf pdf-to-jpeg doc.pdf -o page"
+        },
+        {
+          "name": "pdf-to-text",
+          "summary": "可选文本",
+          "example": "gopdf pdf-to-text doc.pdf"
+        },
+        {
+          "name": "ocr",
+          "summary": "Tesseract OCR",
+          "example": "gopdf ocr scan.pdf -o text.txt"
+        },
+        {
+          "name": "compare-text",
+          "summary": "两份 PDF 的文本对比",
+          "example": "gopdf compare-text a.pdf b.pdf"
+        }
+      ]
+    },
+    "meta": {
+      "title": "元命令",
+      "items": [
+        {
+          "name": "mcp",
+          "summary": "AI 宿主 stdio MCP 服务",
+          "example": "gopdf mcp"
+        },
+        {
+          "name": "install",
+          "summary": "写入代理 MCP 配置",
+          "example": "gopdf install cursor --project"
+        }
+      ]
+    }
+  },
+  "note": "Cursor、Claude、Windsurf：运行 gopdf install 后重启编辑器。",
+  "cta": "MCP 配置指南"
+}

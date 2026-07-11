@@ -1,0 +1,15 @@
+{
+  "brandName": "gopdf CLI",
+  "brandAlt": "gopdf CLI logo",
+  "home": "Home",
+  "commands": "Commands",
+  "mcp": "MCP / AI",
+  "docs": "Docs",
+  "github": "GitHub",
+  "getStarted": "Get Started",
+  "quickStartCTA": "Get started",
+  "mcpCTA": "Use with AI (MCP)",
+  "viewCommands": "Browse commands",
+  "viewDocs": "Read docs",
+  "selectLanguage": "Select language"
+}

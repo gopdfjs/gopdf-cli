@@ -1,0 +1,73 @@
+{
+  "title": "Commands",
+  "subtitle": "Every gopdf subcommand processes local files. MCP tools mirror the same operations for AI agents.",
+  "groups": {
+    "transform": {
+      "title": "Transform",
+      "items": [
+        {
+          "name": "compress",
+          "summary": "Shrink PDF size",
+          "example": "gopdf compress doc.pdf -o out.pdf"
+        },
+        {
+          "name": "grayscale",
+          "summary": "Convert to grayscale",
+          "example": "gopdf grayscale doc.pdf -o gray.pdf"
+        },
+        {
+          "name": "linearize",
+          "summary": "Fast Web View",
+          "example": "gopdf linearize doc.pdf -o web.pdf"
+        }
+      ]
+    },
+    "extract": {
+      "title": "Extract & inspect",
+      "items": [
+        {
+          "name": "analyze",
+          "summary": "Diagnostic report",
+          "example": "gopdf analyze doc.pdf"
+        },
+        {
+          "name": "pdf-to-jpeg",
+          "summary": "Pages to JPEG",
+          "example": "gopdf pdf-to-jpeg doc.pdf -o page"
+        },
+        {
+          "name": "pdf-to-text",
+          "summary": "Selectable text",
+          "example": "gopdf pdf-to-text doc.pdf"
+        },
+        {
+          "name": "ocr",
+          "summary": "OCR via Tesseract",
+          "example": "gopdf ocr scan.pdf -o text.txt"
+        },
+        {
+          "name": "compare-text",
+          "summary": "Text diff between two PDFs",
+          "example": "gopdf compare-text a.pdf b.pdf"
+        }
+      ]
+    },
+    "meta": {
+      "title": "Meta",
+      "items": [
+        {
+          "name": "mcp",
+          "summary": "Stdio MCP server for AI hosts",
+          "example": "gopdf mcp"
+        },
+        {
+          "name": "install",
+          "summary": "Write agent MCP config",
+          "example": "gopdf install cursor --project"
+        }
+      ]
+    }
+  },
+  "note": "For Cursor, Claude, and Windsurf, run gopdf install then restart your editor.",
+  "cta": "MCP setup guide"
+}

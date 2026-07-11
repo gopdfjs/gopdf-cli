@@ -1,0 +1,41 @@
+{
+  "title": "gopdf CLI",
+  "subtitle": "Local PDF tools in your terminal — compress, analyze, OCR, and more. Wire into Cursor, Claude, and Windsurf via MCP.",
+  "stats": {
+    "cli": "Terminal first",
+    "mcp": "AI agents",
+    "local": "Files stay on device"
+  },
+  "features": {
+    "title": "Why gopdf",
+    "local": {
+      "title": "Private by default",
+      "description": "PDFs are read and written on your machine only — no upload pipeline."
+    },
+    "terminal": {
+      "title": "One binary",
+      "description": "Install with npm. Same commands in scripts, CI, and interactive terminals."
+    },
+    "commands": {
+      "title": "Full command set",
+      "description": "Transform, extract, inspect — see every subcommand with examples."
+    },
+    "mcp": {
+      "title": "MCP for AI",
+      "description": "gopdf install wires stdio MCP so agents compress and analyze local PDFs for you."
+    }
+  },
+  "quickStart": {
+    "title": "Quick start",
+    "description": "Script, npm, or Homebrew — then compress a PDF and connect MCP."
+  },
+  "install": {
+    "title": "Install",
+    "script": "curl -fsSL https://gopdfjs.github.io/gopdf-cli/install.js | node",
+    "npm": "npm install -g @gopdfjs/pdf-cli",
+    "brew": "brew install --HEAD systembugtj/luban-homebrew/gopdf",
+    "scriptLabel": "Script",
+    "npmLabel": "npm",
+    "brewLabel": "Homebrew"
+  }
+}
