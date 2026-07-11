@@ -2,7 +2,7 @@
 # Re-fetch PDF fixtures into packages/fixtures/pdf
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-OUT="$ROOT/packages/fixtures/pdf"
+OUT="$ROOT/fixtures/pdf"
 PY_PDF="https://raw.githubusercontent.com/py-pdf/sample-files/main"
 
 mkdir -p "$OUT"

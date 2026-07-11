@@ -2,16 +2,19 @@
 
 Standalone Node monorepo for **`gopdf`** / **`gopdf-cli`** (`@gopdfjs/pdf-cli`).
 
-Self-contained: Rust crates, WASM engine, CLI, Node adapters, fixtures. **No sibling gopdfjs repo required.**
+Self-contained: Rust crates, WASM engine, CLI, fixtures. **No sibling gopdfjs repo required** for CLI dev/build.
+
+`@gopdfjs/adapter-node` (`createNodeRuntime`) is owned by **gopdfjs** — not vendored here.
 
 ## Layout
 
 ```
 gopdf-cli/
   crates/                 Rust → wasm-pack → packages/engine/pkg
+  apps/
+    cli/                    @gopdfjs/pdf-cli — bin (`gopdf`, `gopdf mcp`, `gopdf install …`)
   packages/
-    cli/                    @gopdfjs/pdf-cli — bin
-    node-adapters/          createNodeRuntime()
+    setup/                  @gopdf-cli/setup — MCP agent config installer (CLI-only, not @gopdfjs/*)
     engine/ extract/ …      @gopdfjs/* libs (vendored for this repo)
     fixtures/               test PDFs
 ```
@@ -26,7 +29,7 @@ pnpm test
 ```
 
 ```bash
-node packages/cli/dist/index.mjs compress packages/fixtures/pdf/py-pdf-libre-writer.pdf
+node apps/cli/dist/index.mjs compress packages/fixtures/pdf/py-pdf-libre-writer.pdf
 ```
 
 ## Publish

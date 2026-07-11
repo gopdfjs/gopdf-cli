@@ -1,7 +1,0 @@
-[package]
-name = "gopdf-linearize"
-version.workspace = true
-edition.workspace = true
-description = "PDF Fast Web View linearization (RFC 0042)"
-
-[dependencies]
