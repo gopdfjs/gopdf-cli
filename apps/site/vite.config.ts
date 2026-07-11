@@ -4,7 +4,7 @@ import { wsxPress } from '@wsxjs/wsx-press/node';
 import UnoCSS from 'unocss/vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { cpSync, existsSync, readFileSync, writeFileSync } from 'fs';
+import { cpSync, existsSync, readFileSync, readdirSync, writeFileSync } from 'fs';
 
 const SITE_DEV_PORT = 5175;
 const SITE_PREVIEW_PORT = 5176;
@@ -13,6 +13,36 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const SITE_BASE = process.env.VITE_BASE ?? '/';
 const IS_GH_PAGES = SITE_BASE !== '/';
+const SITE_PREFIX = SITE_BASE.replace(/\/$/, '');
+
+/** Patch wsx-press / i18n absolute fetch paths for GitHub Pages subpath deploy. */
+function patchSubpathAssetsPlugin(): Plugin {
+  return {
+    name: 'patch-subpath-assets',
+    apply: 'build',
+    closeBundle() {
+      if (!IS_GH_PAGES) return;
+
+      const assetsDir = path.resolve(__dirname, 'dist/assets');
+      if (!existsSync(assetsDir)) return;
+
+      const replacements: Array<[string, string]> = [
+        ['"/.wsx-press/', `"${SITE_PREFIX}/.wsx-press/`],
+        ['`/docs/${', `\`${SITE_PREFIX}/docs/\${`],
+      ];
+
+      for (const file of readdirSync(assetsDir)) {
+        if (!file.endsWith('.js')) continue;
+        const filePath = path.join(assetsDir, file);
+        let content = readFileSync(filePath, 'utf8');
+        for (const [from, to] of replacements) {
+          content = content.replaceAll(from, to);
+        }
+        writeFileSync(filePath, content, 'utf8');
+      }
+    },
+  };
+}
 
 /** Copy wsx-press build output into dist for static hosting. */
 function copyWsxPressPlugin(): Plugin {
@@ -75,6 +105,7 @@ export default defineConfig({
       jsxFragment: 'Fragment',
     }),
     copyWsxPressPlugin(),
+    patchSubpathAssetsPlugin(),
     copy404Plugin(),
   ],
 

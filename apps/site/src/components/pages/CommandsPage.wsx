@@ -22,6 +22,12 @@ export class CommandsPage extends LightComponent {
     });
   }
 
+  /** Safe i18n array lookup — avoids crash when locale JSON has not loaded yet. */
+  commandItems(groupKey: string): Array<{ name: string; summary: string; example: string }> {
+    const items = this.t(`groups.${groupKey}.items`, { returnObjects: true });
+    return Array.isArray(items) ? items : [];
+  }
+
   render() {
     return (
       <div class="commands-page">
@@ -41,11 +47,7 @@ export class CommandsPage extends LightComponent {
                   <h2 class="command-group-title">{this.t(`groups.${key}.title`)}</h2>
                 </div>
                 <div class="commands-grid">
-                  {(this.t(`groups.${key}.items`, { returnObjects: true }) as Array<{
-                    name: string;
-                    summary: string;
-                    example: string;
-                  }>).map((item) => (
+                  {this.commandItems(key).map((item) => (
                     <article class="command-card" key={item.name}>
                       <h3 class="command-name">gopdf {item.name}</h3>
                       <p class="command-description">{item.summary}</p>
