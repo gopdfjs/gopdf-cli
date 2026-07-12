@@ -1,8 +1,6 @@
 /** @jsxImportSource @wsxjs/wsx-core */
 
 import { LightComponent, autoRegister } from '@wsxjs/wsx-core';
-// 导入 wsx-press 客户端组件（触发自动注册）
-import '@wsxjs/wsx-press/client';
 import styles from './DocsPage.css?inline';
 
 /**

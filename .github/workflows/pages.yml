@@ -41,7 +41,7 @@ jobs:
       - name: Build site
         run: pnpm --filter=@gopdf-cli/site build:pages
         env:
-          GITHUB_PAGES: 'true'
+          VITE_BASE: /gopdf-cli/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

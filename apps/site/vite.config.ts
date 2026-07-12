@@ -5,16 +5,15 @@ import UnoCSS from 'unocss/vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { cpSync, existsSync, copyFileSync } from 'fs';
-import { resolveSiteBase } from './vite-plugins/resolveSiteBase';
-import { wsxPressBasePlugin } from './vite-plugins/wsxPressBasePlugin';
 
 const SITE_DEV_PORT = 5179;
 const SITE_PREVIEW_PORT = 5180;
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+/** Vite base — `/` in dev; set `VITE_BASE=/gopdf-cli/` for GitHub Pages (see build:pages). */
+const SITE_BASE = process.env.VITE_BASE ?? '/';
+const IS_SUBPATH_DEPLOY = SITE_BASE !== '/';
 
-const SITE_BASE = resolveSiteBase();
-const IS_GH_PAGES = process.env.GITHUB_PAGES === 'true';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** Copy wsx-press build output into dist for static hosting. */
 function copyWsxPressPlugin(): Plugin {
@@ -39,7 +38,7 @@ function copy404Plugin(): Plugin {
     name: 'copy-404',
     apply: 'build',
     closeBundle() {
-      if (!IS_GH_PAGES) {
+      if (!IS_SUBPATH_DEPLOY) {
         return;
       }
 
@@ -62,7 +61,6 @@ export default defineConfig({
       docsRoot: path.resolve(__dirname, './public/docs'),
       outputDir: path.resolve(__dirname, './.wsx-press'),
     }),
-    wsxPressBasePlugin(SITE_BASE),
     UnoCSS(),
     wsx({
       debug: false,

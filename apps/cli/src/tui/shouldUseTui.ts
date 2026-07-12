@@ -6,7 +6,7 @@ export function shouldUseTui(argv: string[] = process.argv.slice(2)): boolean {
   if (argv.includes("--plain") || argv.includes("--no-ui")) {
     return false;
   }
-  return Boolean(process.stderr.isTTY() && process.stdout.isTTY());
+  return Boolean(process.stderr.isTTY && process.stdout.isTTY);
 }
 
 /** Strip global UI flags before command argv parsing. */

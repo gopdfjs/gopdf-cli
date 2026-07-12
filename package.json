@@ -16,5 +16,11 @@
     "@systembug/pangu": "^0.1.0",
     "@systembug/qingniao": "^0.1.0",
     "turbo": "latest"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "19.2.7",
+      "@types/react": "19.2.7"
+    }
   }
 }

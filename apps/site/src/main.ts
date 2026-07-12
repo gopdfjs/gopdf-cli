@@ -1,7 +1,9 @@
 /**
- * GoPDF.js site — WSX entry (GitHub Pages docs landing).
+ * gopdf-cli docs site — WSX entry (GitHub Pages).
  */
 
+import './press-init';
+import '@wsxjs/wsx-press/client';
 import { createLogger } from '@wsxjs/wsx-core';
 import { normalizeSitePathname } from './sitePaths';
 import 'uno.css';
