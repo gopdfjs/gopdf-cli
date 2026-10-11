@@ -2,12 +2,12 @@
 title: Installation
 order: 2
 category: guide
-description: 'Install gopdf — script, npm, or Homebrew'
+description: 'Install gopdf — script, npm, Homebrew, or Nix'
 ---
 
 # Installation
 
-Three ways to install **gopdf**. All require **Node.js 18+** (Homebrew formula installs Node as a dependency).
+Four ways to install **gopdf**. Script, npm, and Homebrew require **Node.js 18+** (package managers install Node as a dependency). Nix bundles Node inside the derivation.
 
 ## 1. Install script (recommended)
 
@@ -54,6 +54,23 @@ brew install systembugtj/luban-homebrew/gopdf
 ```
 
 Formula lives in the **[luban-homebrew](https://github.com/systembugtj/luban-homebrew)** tap. Spec: [RFC 0003](https://github.com/gopdfjs/gopdf-cli/blob/main/.spec/rfc/0003-homebrew-formula.md).
+
+## 4. Nix (cangjie-nix flake, Linux)
+
+Build or install from the **[cangjie-nix](https://github.com/systembugtj/cangjie-nix)** flake (`x86_64-linux`, `aarch64-linux`):
+
+```bash
+nix profile install github:systembugtj/cangjie-nix#gopdf
+```
+
+Or build once:
+
+```bash
+nix build github:systembugtj/cangjie-nix#gopdf
+./result/bin/gopdf --help
+```
+
+Until `@gopdfjs/pdf-cli` is on npm, the flake builds from a pinned `gopdf-cli` git commit. Spec: [cangjie-nix RFC 0003](https://github.com/systembugtj/cangjie-nix/blob/main/.spec/rfc/0003-gopdf-nix-package.md).
 
 ## Verify
 

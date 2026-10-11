@@ -31,7 +31,9 @@ Tap conventions follow existing [luban-homebrew RFC](https://github.com/systembu
 
 ## 3. Formula strategy (v1)
 
-**Node-dependent npm global install** inside the formula — matches how the CLI ships today (`@gopdfjs/pdf-cli`).
+**HEAD (until npm publish):** build from `gopdf-cli` git — `pnpm install`, vite build, `pnpm deploy --legacy --prod` into `libexec` (removes `apps/site` first so deploy does not pull site deps). Vite externalizes `@gopdfjs/*`; deploy ships runtime `node_modules`.
+
+**Stable (after npm publish):** Node-dependent npm global install inside the formula — matches how the CLI ships (`@gopdfjs/pdf-cli`).
 
 ```ruby
 class Gopdf < Formula
@@ -74,6 +76,7 @@ Site installation guide order:
 1. **Script** — `curl … install.js | node`
 2. **npm** — `npm install -g @gopdfjs/pdf-cli`
 3. **Homebrew** — `brew install systembugtj/luban-homebrew/gopdf`
+4. **Nix (Linux)** — `nix profile install github:systembugtj/cangjie-nix#gopdf` via [cangjie-nix](https://github.com/systembugtj/cangjie-nix)
 
 ## 6. Out of scope (this RFC)
 
