@@ -8,6 +8,7 @@ overrides:
   react: 19.2.7
   '@types/react': 19.2.7
   pdfjs-dist: 5.5.207
+  '@napi-rs/canvas': 0.1.97
 
 importers:
 
@@ -7664,7 +7665,7 @@ snapshots:
 
   pdfjs-dist@5.5.207:
     optionalDependencies:
-      '@napi-rs/canvas': 0.1.100
+      '@napi-rs/canvas': 0.1.97
       node-readable-to-web-readable-stream: 0.4.2
 
   perfect-debounce@2.1.0: {}
