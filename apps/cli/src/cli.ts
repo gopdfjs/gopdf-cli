@@ -11,6 +11,12 @@ export async function runCli(argv: string[]): Promise<number> {
     return 0;
   }
 
+  const { ENGINE_OPERATIONS } = await import("./lib/engineOperation.ts");
+  if (Object.hasOwn(ENGINE_OPERATIONS, cmd)) {
+    const { runEngineOperation } = await import("./commands/engineOperation.ts");
+    return runEngineOperation(cmd as keyof typeof ENGINE_OPERATIONS, rest);
+  }
+
   switch (cmd) {
     case "compress": {
       const { runCompress } = await import("./commands/compress.ts");

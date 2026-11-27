@@ -13,6 +13,7 @@ import { readBytes, writeBytes, writeText } from "../lib/io.ts";
 import { formatAnalyzeReportText } from "../lib/analyzeReport.ts";
 import { formatTextDiffReport } from "./compareText.ts";
 import { readPdfTextFromFile, PDF_TO_TEXT_FORMAT } from "./pdfToText.ts";
+import { ENGINE_OPERATIONS, executeEngineOperation, saveOperationResult, type EngineOperation } from "../lib/engineOperation.ts";
 
 /** MCP stdio server — all tools call `engine.*()` via getEngine() (RFC 0001). */
 export async function runMcpServer(): Promise<number> {
@@ -127,6 +128,18 @@ export async function runMcpServer(): Promise<number> {
           required: ["pathA", "pathB"],
         },
       },
+      ...Object.entries(ENGINE_OPERATIONS).map(([operation]) => ({
+        name: `gopdf_${operation.replaceAll("-", "_")}`,
+        description: `Run the ${operation} engine operation. args are passed in engine method argument order; use {file: path} for PDF bytes.`,
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            args: { type: "array", items: {} },
+            output: { type: "string" },
+          },
+          required: ["args"],
+        },
+      })),
     ],
   }));
 
@@ -135,6 +148,16 @@ export async function runMcpServer(): Promise<number> {
     const engine = await getEngine();
 
     try {
+      const operationEntry = Object.entries(ENGINE_OPERATIONS).find(
+        ([operation]) => name === `gopdf_${operation.replaceAll("-", "_")}`,
+      );
+      if (operationEntry) {
+        const [operation] = operationEntry as [EngineOperation, string];
+        const { args: operationArgs, output } = args as { args: unknown[]; output?: string };
+        const result = await executeEngineOperation(operation, { args: operationArgs, output });
+        return { content: [{ type: "text", text: await saveOperationResult(result, output) }] };
+      }
+
       switch (name) {
         case "compress_pdf": {
           const { inputPath, outputPath, level = "recommended" } = args as {
